@@ -1,29 +1,46 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { ICompaniesRepository } from './repositories/companies.repository';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
+import { Paginated } from 'src/shared/dto/response.dto';
 
 @Injectable()
 export class CompaniesService {
-  create(createCompanyDto: CreateCompanyDto) {
-    console.log(createCompanyDto);
-    return 'This action adds a new company';
+  constructor(private readonly companiesRepo: ICompaniesRepository) {}
+
+  async create(dto: CreateCompanyDto) {
+    const exists = await this.companiesRepo.findByCnpj(dto.cnpj);
+    if (exists) {
+      throw new ConflictException('CNPJ já cadastrado.');
+    }
+    return this.companiesRepo.create(dto);
+  }
+  async findById(id: string) {
+    const company = await this.companiesRepo.findById(id);
+    if (!company) throw new NotFoundException('Empresa não encontrada.');
+    return company;
   }
 
-  findAll() {
-    return `This action returns all companies`;
+  async list(page: number, limit: number): Promise<Paginated<unknown>> {
+    const { data, total } = await this.companiesRepo.list({ page, limit });
+    return { data, total, page, limit };
   }
 
-  findOne(id: number) {
-    console.log(id);
-    return `This action returns a #${id} company`;
+  async update(id: string, dto: UpdateCompanyDto) {
+    await this.findById(id);
+    if (dto.cnpj) {
+      const c = await this.companiesRepo.findByCnpj(dto.cnpj);
+      if (c && c.id !== id) throw new ConflictException('CNPJ já cadastrado.');
+    }
+    return this.companiesRepo.update(id, dto);
   }
 
-  update(id: number, updateCompanyDto: UpdateCompanyDto) {
-    console.log(updateCompanyDto);
-    return `This action updates a #${id} company`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} company`;
+  async delete(id: string) {
+    await this.findById(id);
+    await this.companiesRepo.delete(id);
   }
 }

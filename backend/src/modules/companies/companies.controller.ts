@@ -1,42 +1,46 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
-  Patch,
+  Get,
+  Query,
   Param,
+  Patch,
   Delete,
 } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
+import { PaginationDto } from 'src/shared/dto/pagination.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('companies')
 @Controller('companies')
 export class CompaniesController {
-  constructor(private readonly companiesService: CompaniesService) {}
+  constructor(private readonly service: CompaniesService) {}
 
   @Post()
-  create(@Body() createCompanyDto: CreateCompanyDto) {
-    return this.companiesService.create(createCompanyDto);
+  create(@Body() dto: CreateCompanyDto) {
+    return this.service.create(dto);
   }
 
   @Get()
-  findAll() {
-    return this.companiesService.findAll();
+  list(@Query() { page, limit }: PaginationDto) {
+    return this.service.list(page, limit);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.companiesService.findOne(+id);
+  find(@Param('id') id: string) {
+    return this.service.findById(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto) {
-    return this.companiesService.update(+id, updateCompanyDto);
+  update(@Param('id') id: string, @Body() dto: UpdateCompanyDto) {
+    return this.service.update(id, dto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.companiesService.remove(+id);
+    return this.service.delete(id);
   }
 }

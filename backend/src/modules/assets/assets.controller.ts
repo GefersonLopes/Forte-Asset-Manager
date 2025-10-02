@@ -1,42 +1,69 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
-  Patch,
+  Get,
+  Query,
   Param,
+  Patch,
   Delete,
 } from '@nestjs/common';
 import { AssetsService } from './assets.service';
-import { CreateAssetDto } from './dto/create-asset.dto';
+import {
+  CreateAssetDto,
+  AssetStatusDto,
+  AssetTypeDto,
+} from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
+import { PaginationDto } from 'src/shared/dto/pagination.dto';
+import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('assets')
 @Controller('assets')
 export class AssetsController {
-  constructor(private readonly assetsService: AssetsService) {}
+  constructor(private readonly service: AssetsService) {}
 
   @Post()
-  create(@Body() createAssetDto: CreateAssetDto) {
-    return this.assetsService.create(createAssetDto);
+  create(@Body() dto: CreateAssetDto) {
+    return this.service.create(dto);
   }
 
   @Get()
-  findAll() {
-    return this.assetsService.findAll();
+  @ApiQuery({ name: 'type', enum: AssetTypeDto, required: false })
+  @ApiQuery({ name: 'status', enum: AssetStatusDto, required: false })
+  list(
+    @Query() { page, limit }: PaginationDto,
+    @Query('type') type?: AssetTypeDto,
+    @Query('status') status?: AssetStatusDto,
+  ) {
+    return this.service.list(page, limit, type, status);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.assetsService.findOne(+id);
+  find(@Param('id') id: string) {
+    return this.service.findById(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAssetDto: UpdateAssetDto) {
-    return this.assetsService.update(+id, updateAssetDto);
+  update(@Param('id') id: string, @Body() dto: UpdateAssetDto) {
+    return this.service.update(id, dto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.assetsService.remove(+id);
+    return this.service.delete(id);
+  }
+
+  @Post(':id/assign')
+  @ApiBody({
+    schema: { properties: { employeeId: { type: 'string', format: 'uuid' } } },
+  })
+  assign(@Param('id') id: string, @Body('employeeId') employeeId: string) {
+    return this.service.assign(id, employeeId);
+  }
+
+  @Post(':id/unassign')
+  unassign(@Param('id') id: string) {
+    return this.service.unassign(id);
   }
 }

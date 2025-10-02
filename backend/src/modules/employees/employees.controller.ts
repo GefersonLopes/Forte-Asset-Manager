@@ -1,45 +1,59 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
-  Patch,
+  Get,
+  Query,
   Param,
+  Patch,
   Delete,
 } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { PaginationDto } from 'src/shared/dto/pagination.dto';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import { AssetsService } from '../assets/assets.service';
 
+@ApiTags('employees')
 @Controller('employees')
 export class EmployeesController {
-  constructor(private readonly employeesService: EmployeesService) {}
+  constructor(
+    private readonly service: EmployeesService,
+    private readonly assetsService: AssetsService,
+  ) {}
 
   @Post()
-  create(@Body() createEmployeeDto: CreateEmployeeDto) {
-    return this.employeesService.create(createEmployeeDto);
+  create(@Body() dto: CreateEmployeeDto) {
+    return this.service.create(dto);
   }
 
   @Get()
-  findAll() {
-    return this.employeesService.findAll();
+  @ApiQuery({ name: 'companyId', required: false })
+  list(
+    @Query() { page, limit }: PaginationDto,
+    @Query('companyId') companyId?: string,
+  ) {
+    return this.service.list(page, limit, companyId);
+  }
+
+  @Get(':id/assets')
+  listAssets(@Param('id') id: string) {
+    return this.assetsService.listByEmployee(id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.employeesService.findOne(+id);
+  find(@Param('id') id: string) {
+    return this.service.findById(id);
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateEmployeeDto: UpdateEmployeeDto,
-  ) {
-    return this.employeesService.update(+id, updateEmployeeDto);
+  update(@Param('id') id: string, @Body() dto: UpdateEmployeeDto) {
+    return this.service.update(id, dto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.employeesService.remove(+id);
+    return this.service.delete(id);
   }
 }

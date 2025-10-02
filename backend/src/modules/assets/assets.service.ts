@@ -5,6 +5,7 @@ import { UpdateAssetDto } from './dto/update-asset.dto';
 @Injectable()
 export class AssetsService {
   create(createAssetDto: CreateAssetDto) {
+    console.log(createAssetDto);
     return 'This action adds a new asset';
   }
 
@@ -17,6 +18,7 @@ export class AssetsService {
   }
 
   update(id: number, updateAssetDto: UpdateAssetDto) {
+    console.log(updateAssetDto);
     return `This action updates a #${id} asset`;
   }
 

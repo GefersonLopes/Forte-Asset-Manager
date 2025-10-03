@@ -1,98 +1,238 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Forte Asset Manager — Backend (NestJS + Prisma + PostgreSQL)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API RESTful de **gestão de ativos de TI** (notebooks, monitores, celulares) associados a funcionários de empresas.  
+Projeto escrito 100% em **TypeScript**, com **NestJS**, **Prisma**, **PostgreSQL**, **Docker**, testes **Jest**, validações com **class-validator** e documentação **Swagger**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+> Arquitetura **CSR** (Controller → Service → Repository), com **Services nunca acessando o Prisma diretamente**. Regras de negócio concentradas nos services; acesso a banco encapsulado em repositories.
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## ✨ Principais funcionalidades
+- **Companies**: CRUD completo (`id`, `name`, `cnpj` único)
+- **Employees**: CRUD completo (`id`, `name`, `email` único, `cpf` único, `companyId` fk)
+- **Assets**: CRUD completo (`id`, `name`, `type`, `status`, `employeeId?` fk)
+  - Filtros de listagem por `type` e `status` + paginação
+  - **Assign/Unassign** de ativos:
+    - `POST /assets/:id/assign` → só quando status = **Disponível**; ao associar vira **Em Uso**
+    - `POST /assets/:id/unassign` → volta a **Disponível** e `employeeId = null`
+    - **Regra de negócio crucial**: um funcionário pode ter **no máximo 1 "Notebook"** em uso. Violação → **409**
+- **Listagens adicionais**:
+  - `GET /employees?companyId=...` → funcionários por empresa (paginado)
+  - `GET /employees/:id/assets` → ativos de um funcionário
 
-## Project setup
+---
 
-```bash
-$ npm install
+## 🧱 Stacks & libs
+- **Node 20+**, **TypeScript**
+- **NestJS 10**
+- **Prisma ORM** + **PostgreSQL**
+- **Docker / docker-compose** (banco de dados)
+- **class-validator / class-transformer** (DTOs)
+- **Swagger (OpenAPI)** em `/api`
+- **Jest** (testes unitários de *services* com mocks de repositories)
+- **ESLint + Prettier + Husky** (pre-commit: lint + test)
+
+---
+
+## 🏗️ Arquitetura (CSR)
+- **Controllers**: lidam com HTTP/DTO/validações. **Sem regra de negócio**.
+- **Services**: regras de negócio e orquestração. **Nunca** acessam o Prisma.
+- **Repositories**: **único** acesso ao PrismaClient. Camada substituível via **tokens** de DI.
+
+---
+
+## 📁 Estrutura de Pastas (principal)
+
+A estrutura abaixo reflete o que está no repositório (conforme seu screenshot):
+
+```
+backend/
+├─ .husky/
+├─ dist/
+├─ generated/
+├─ node_modules/
+├─ prisma/
+│  ├─ migrations/
+│  │  └─ 20251002220458_init/           # migração inicial gerada
+│  └─ schema.prisma
+├─ src/
+│  ├─ database/
+│  │  ├─ database.module.ts
+│  │  └─ prisma.service.ts
+│  ├─ health/
+│  │  ├─ health.controller.ts
+│  │  └─ health.module.ts
+│  ├─ modules/
+│  │  ├─ assets/
+│  │  │  ├─ dto/
+│  │  │  │  ├─ create-asset.dto.ts
+│  │  │  │  └─ update-asset.dto.ts
+│  │  │  ├─ repositories/
+│  │  │  │  ├─ assets.repository.ts
+│  │  │  │  └─ prisma-assets.repository.ts
+│  │  │  ├─ assets.controller.ts
+│  │  │  ├─ assets.module.ts
+│  │  │  └─ assets.service.ts
+│  │  ├─ companies/
+│  │  └─ employees/
+│  ├─ tests/
+│  │  ├─ assets.service.spec.ts
+│  │  ├─ companies.service.spec.ts
+│  │  └─ employees.service.spec.ts
+│  ├─ shared/
+│  │  ├─ constants/
+│  │  │  └─ tokens.ts
+│  │  └─ dto/
+│  │     ├─ pagination.dto.ts
+│  │     └─ response.dto.ts
+│  ├─ app.module.ts
+│  └─ main.ts
+├─ test/
+├─ .env
+├─ .env.example
+├─ docker-compose.yml
+├─ Dockerfile
+├─ eslint.config.mjs
+├─ .prettierrc
+├─ ...
+├─ forte-asset-manager-postman # Arquivo de coleção com todos os endpoints para uso no postman 
+└─ README.md
 ```
 
-## Compile and run the project
+> Observação: se `companies` e `employees` ainda não aparecem no screenshot acima, eles existem no projeto de exemplo e devem seguir a mesma organização de **assets** (dto, repositories, controller, service, module).
 
-```bash
-# development
-$ npm run start
+---
 
-# watch mode
-$ npm run start:dev
+## ⚙️ Variáveis de ambiente
 
-# production mode
-$ npm run start:prod
+Crie o arquivo `.env` (ou copie `.env.example`), com a string de conexão do Postgres:
+
+```env
+# .env
+DATABASE_URL="postgresql://forte:forte@localhost:5432/forte_asset_manager?schema=public"
 ```
 
-## Run tests
+> Os valores acima batem com o `docker-compose.yml` (user: `forte`, pass: `forte`, db: `forte_asset_manager`).
+
+---
+
+## 🐳 Subindo com Docker (PostgreSQL)
+
+**Subir o banco**
+   ```bash
+    docker compose up -d db
+    docker compose run --rm api sh -c "npx prisma migrate dev --name init"
+    docker compose up -d api
+   ```
+
+
+## 🐳 Subindo com NodeJS
+
+1. **Instalar as dependências**
+   ```bash
+   npm i
+   ```
+
+2. **Gerar o Prisma Client**
+   ```bash
+   npx prisma generate
+   ```
+
+3. **Aplicar a migração inicial** (usa as migrações de `prisma/migrations`):
+   - Ambiente dev (cria/ajusta o schema e mantém histórico):
+     ```bash
+     npx prisma migrate dev --name init
+     ```
+   - Ambiente prod (só aplica migrações já existentes):
+     ```bash
+     npx prisma migrate deploy
+     ```
+
+4. **Rodar o servidor em dev**
+   ```bash
+   npm run start:dev
+   ```
+   - App: `http://localhost:3000`
+   - Swagger: `http://localhost:3000/api`
+   - Health: `http://localhost:3000/health`
+
+> Dica: Se preferir, crie *seeds* depois (ex.: `npx prisma db seed`).
+
+---
+
+## ▶️ Scripts NPM úteis
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run start          # inicia buildado (dist)
+npm run start:dev      # NestJS em watch mode
+npm run build          # compila TypeScript -> dist
+npm run lint           # ESLint
+npm run test           # Jest (unit tests)
+npm run prisma:generate
+npm run prisma:migrate # atalho (se configurado no package.json)
 ```
 
-## Deployment
+---
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## 🔐 Validações e DTOs
+- DTOs com `class-validator` + `class-transformer` (ex.: `PaginationDto`, `Create*Dto`, `Update*Dto`).
+- `ValidationPipe` global com `whitelist`, `transform` e `forbidNonWhitelisted` habilitados (vide `main.ts`).
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+---
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+## 🧪 Testes
+- **Jest** configurado com testes unitários dos **services** usando **mocks** dos repositories.
+- Executar:
+  ```bash
+  npm test
+  ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+## 📜 Swagger
+- A documentação OpenAPI é gerada via `@nestjs/swagger` e exposta em:
+  - `http://localhost:3000/api`
 
-Check out a few resources that may come in handy when working with NestJS:
+---
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## 🚦 Husky (Qualidade no commit)
+- Hook de **pre-commit** roda `npm run lint` e `npm test`.
+- Ative após instalar dependências:
+  ```bash
+  npx husky install
+  ```
 
-## Support
+---
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## 🔌 Endpoints (resumo)
+- **Companies**: `POST /companies`, `GET /companies`, `GET /companies/:id`, `PATCH /companies/:id`, `DELETE /companies/:id`
+- **Employees**: `POST /employees`, `GET /employees`, `GET /employees/:id`, `PATCH /employees/:id`, `DELETE /employees/:id`, `GET /employees/:id/assets`
+- **Assets**: `POST /assets`, `GET /assets`, `GET /assets/:id`, `PATCH /assets/:id`, `DELETE /assets/:id`, `POST /assets/:id/assign`, `POST /assets/:id/unassign`
+- **Health**: `GET /health`
 
-## Stay in touch
+### Regras de negócio chave
+- `assign`: só permitido quando o asset está **"Disponível"** → senão **422**.
+- Ao associar: `status` muda para **"Em Uso"** e `employeeId` é definido.
+- **Máximo 1 "Notebook"** por funcionário em uso → violar retorna **409**.
+- `unassign`: `status` volta a **"Disponível"** e `employeeId = null`.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+---
 
-## License
+## 🧰 Troubleshooting
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- **Erro de conexão com o banco**: confirme `docker compose ps`, porta `5432` livre, e `DATABASE_URL` correta.
+- **Prisma Client não gerado**: rode `npx prisma generate` após `npm i`.
+- **Conflitos de porta**: altere a porta do Postgres no `docker-compose.yml` e ajuste a `DATABASE_URL`.
+- **Migração inicial**: se a tabela não existe, rode `npx prisma migrate dev --name init` (dev) ou `npx prisma migrate deploy` (prod).
+
+---
+
+## 📄 Licença
+MIT — use à vontade. :)
+
+---
+
+## 🗺️ Referências rápidas
+- NestJS: https://docs.nestjs.com/
+- Prisma: https://www.prisma.io/docs
+- Swagger (Nest): https://docs.nestjs.com/openapi/introduction

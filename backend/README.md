@@ -116,7 +116,7 @@ DATABASE_URL="postgresql://forte:forte@localhost:5432/forte_asset_manager?schema
 
 ---
 
-## 🐳 Subindo com Docker (PostgreSQL)
+## 🐳 Subindo com Docker (PostgreSQL & Api)
 
 **Subir o banco**
    ```bash

@@ -11,9 +11,9 @@ import {
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
-import { PaginationDto } from '../../shared/dto/pagination.dto';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AssetsService } from '../assets/assets.service';
+import { EmployeesListQueryDto } from './dto/list-employee.dto';
 
 @ApiTags('employees')
 @Controller('employees')
@@ -31,7 +31,7 @@ export class EmployeesController {
   @Get()
   @ApiQuery({ name: 'companyId', required: false })
   list(
-    @Query() { page, limit }: PaginationDto,
+    @Query() { page, limit }: EmployeesListQueryDto,
     @Query('companyId') companyId?: string,
   ) {
     return this.service.list(page, limit, companyId);

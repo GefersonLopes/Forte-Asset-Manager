@@ -15,8 +15,8 @@ import {
   AssetTypeDto,
 } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
-import { PaginationDto } from '../../shared/dto/pagination.dto';
 import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { AssetsListQueryDto } from './dto/list-asset.dto';
 
 @ApiTags('assets')
 @Controller('assets')
@@ -32,7 +32,7 @@ export class AssetsController {
   @ApiQuery({ name: 'type', enum: AssetTypeDto, required: false })
   @ApiQuery({ name: 'status', enum: AssetStatusDto, required: false })
   list(
-    @Query() { page, limit }: PaginationDto,
+    @Query() { page, limit }: AssetsListQueryDto,
     @Query('type') type?: AssetTypeDto,
     @Query('status') status?: AssetStatusDto,
   ) {

@@ -15,7 +15,7 @@ import {
   AssetTypeDto,
 } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
-import { PaginationDto } from 'src/shared/dto/pagination.dto';
+import { PaginationDto } from '../../shared/dto/pagination.dto';
 import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('assets')

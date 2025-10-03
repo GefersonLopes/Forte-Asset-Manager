@@ -11,7 +11,7 @@ import {
   AssetTypeDto,
 } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
-import { Paginated } from 'src/shared/dto/response.dto';
+import { Paginated } from '../../shared/dto/response.dto';
 import { AssetStatus, AssetType } from '@prisma/client';
 import { IEmployeesRepository } from '../employees/repositories/employees.repository';
 

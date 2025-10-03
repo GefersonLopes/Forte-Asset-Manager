@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { EmployeesController } from './employees.controller';
 import { EmployeesService } from './employees.service';
-import { TOKENS } from 'src/shared/constants/tokens';
+import { TOKENS } from '../../shared/constants/tokens';
 import { PrismaEmployeesRepository } from './repositories/prisma-employees.repository';
-import { DatabaseModule } from 'src/database/database.module';
+import { DatabaseModule } from '../../database/database.module';
 import { AssetsModule } from '../assets/assets.module';
 
 @Module({

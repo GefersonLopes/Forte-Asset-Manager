@@ -6,7 +6,7 @@ import {
 import { IEmployeesRepository } from './repositories/employees.repository';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
-import { Paginated } from 'src/shared/dto/response.dto';
+import { Paginated } from '../../shared/dto/response.dto';
 
 @Injectable()
 export class EmployeesService {

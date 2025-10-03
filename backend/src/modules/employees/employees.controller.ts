@@ -11,7 +11,7 @@ import {
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
-import { PaginationDto } from 'src/shared/dto/pagination.dto';
+import { PaginationDto } from '../../shared/dto/pagination.dto';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AssetsService } from '../assets/assets.service';
 

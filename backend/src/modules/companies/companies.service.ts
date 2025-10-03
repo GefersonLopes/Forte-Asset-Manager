@@ -6,7 +6,7 @@ import {
 import { ICompaniesRepository } from './repositories/companies.repository';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
-import { Paginated } from 'src/shared/dto/response.dto';
+import { Paginated } from '../../shared/dto/response.dto';
 
 @Injectable()
 export class CompaniesService {

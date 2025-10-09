@@ -22,10 +22,15 @@ export const apiHttpInterceptor: HttpInterceptorFn = (
   const cloned = req.clone({ url });
   return next(cloned).pipe(
     catchError((err: HttpErrorResponse) => {
-      mapper.show(
-        err.status,
-        (err.error && (err.error.message || err.error.error)) || err.statusText,
-      );
+      const msg =
+        typeof err.error === 'string'
+          ? err.error
+          : Array.isArray(err.error?.message)
+            ? err.error.message.join('\n')
+            : (err.error?.message ?? err.statusText ?? 'Erro inesperado.');
+
+      mapper.show(err.status, msg);
+
       return throwError(() => err);
     }),
   );

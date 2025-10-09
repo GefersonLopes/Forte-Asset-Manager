@@ -17,6 +17,7 @@ export interface Employee {
   email: string;
   cpf: string;
   companyId: string;
+  createdAt?: string;
 }
 export type AssetType = 'Notebook' | 'Monitor' | 'Celular';
 export type AssetStatusLabel = 'Disponível' | 'Em Uso' | 'Em Manutenção';

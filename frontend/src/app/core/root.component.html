@@ -1,0 +1,67 @@
+<section class="min-h-screen flex flex-col w-full">
+  <mat-toolbar color="primary" class="sticky top-0 z-50 w-full !bg-white !px-1 md:!px-15">
+    <button class="mt-[-12px]" mat-icon-button routerLink="/companies" aria-label="Ir para início">
+      <mat-icon fontSet="material-symbols-outlined">l_mobiledata</mat-icon>
+      <mat-icon fontSet="material-symbols-outlined" class="ml-[-21px]">g_mobiledata</mat-icon>
+    </button>
+
+    <span class="ml-3 font-semibold hidden md:block">Geferson Lopes</span>
+
+    <span class="flex-1"></span>
+
+    <a mat-button routerLink="/companies">Início</a>
+    <a mat-button href="https://wa.me/5571996063783" target="_blank" rel="noopener noreferrer"
+      >Contato</a
+    >
+    <a
+      mat-button
+      href="https://www.linkedin.com/in/algeferson/"
+      target="_blank"
+      rel="noopener noreferrer"
+      >Linkedin</a
+    >
+    <a mat-button href="https://github.com/GefersonLopes" target="_blank" rel="noopener noreferrer"
+      >Github</a
+    >
+  </mat-toolbar>
+
+  <main class="my-4 flex-1 !px-1 md:!px-20">
+    <router-outlet />
+  </main>
+
+  <mat-toolbar
+    color="primary"
+    class="bottom-0 z-40 w-screen flex flex-wrap justify-center md:justify-between py-2 !bg-black !text-white !px-1 md:!px-20"
+  >
+    <div class="flex items-center gap-1">
+      <mat-icon fontSet="material-symbols-outlined">copyright</mat-icon>
+      <span class="text-sm">2025 Geferson Lopes</span>
+    </div>
+
+    <div class="flex flex-wrap justify-center md:justify-end gap-2">
+      <a
+        mat-button
+        href="https://wa.me/5571996063783"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex items-center gap-1"
+      >
+        Contato
+      </a>
+      <a
+        mat-button
+        href="https://www.linkedin.com/in/algeferson/"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Linkedin</a
+      >
+      <a
+        mat-button
+        href="https://github.com/GefersonLopes"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Github</a
+      >
+    </div>
+  </mat-toolbar>
+</section>

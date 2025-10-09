@@ -4,7 +4,12 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { EmployeesApiService } from '../../core/services/employees-api.service';
+import { CommonModule } from '@angular/common';
+import { emailStrictValidator } from '../../shared/utils/email-strict.validator';
+import { cpfValidator } from '../../shared/utils/cpf.validator';
+import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 
 @Component({
   standalone: true,
@@ -15,40 +20,12 @@ import { EmployeesApiService } from '../../core/services/employees-api.service';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatIconModule,
+    CommonModule,
+    NgxMaskDirective,
   ],
-  template: `
-    <h2 mat-dialog-title>Novo Funcionário</h2>
-    <form [formGroup]="form" (ngSubmit)="submit()" class="grid gap-4 p-4">
-      <mat-form-field appearance="outline">
-        <mat-label>Nome</mat-label>
-        <input matInput formControlName="name" required />
-        @if (form.get('name')?.invalid) {
-          <mat-error>Informe o nome</mat-error>
-        }
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Email</mat-label>
-        <input matInput formControlName="email" required type="email" />
-        @if (form.get('email')?.invalid) {
-          <mat-error>Informe um email válido</mat-error>
-        }
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>CPF</mat-label>
-        <input matInput formControlName="cpf" required />
-        @if (form.get('cpf')?.invalid) {
-          <mat-error>Informe o CPF</mat-error>
-        }
-      </mat-form-field>
-
-      <div class="flex justify-end gap-2">
-        <button mat-button mat-dialog-close>Cancelar</button>
-        <button mat-flat-button color="primary" [disabled]="form.invalid">Salvar</button>
-      </div>
-    </form>
-  `,
+  providers: [provideNgxMask()],
+  templateUrl: './employee-form.dialog.html',
 })
 export class EmployeeFormDialog {
   form;
@@ -59,20 +36,36 @@ export class EmployeeFormDialog {
     private ref: MatDialogRef<EmployeeFormDialog>,
     @Inject(MAT_DIALOG_DATA) public data: { companyId: string },
   ) {
-    this.form = this.fb.group({
-      name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      cpf: ['', Validators.required],
+    this.form = this.fb.nonNullable.group({
+      name: ['', [Validators.required, Validators.minLength(3)]],
+      email: ['', [Validators.required, emailStrictValidator()]],
+      cpf: ['', [Validators.required, cpfValidator()]],
     });
   }
+
   submit() {
-    if (this.form.invalid) return;
-    const body = { ...this.form.value, companyId: this.data.companyId } as {
-      name: string;
-      email: string;
-      cpf: string;
-      companyId: string;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const raw = this.form.getRawValue();
+    const body = {
+      name: raw.name,
+      email: raw.email,
+      cpf: (raw.cpf ?? '').toString().replace(/\D/g, ''),
+      companyId: this.data.companyId,
     };
-    this.api.create(body).subscribe({ next: () => this.ref.close(true) });
+
+    this.api.create(body).subscribe({
+      next: () => {
+        this.form.reset();
+        this.ref.close(true);
+      },
+      error: () => {
+        this.form.reset();
+        this.ref.close(false);
+      },
+    });
   }
 }

@@ -5,6 +5,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { CompaniesApiService } from '../../core/services/companies-api.service';
+import { MatIconModule } from '@angular/material/icon';
+import { CommonModule } from '@angular/common';
+import { cnpjValidator } from '../../shared/utils/cnpj.validator';
+import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 
 @Component({
   standalone: true,
@@ -15,34 +19,12 @@ import { CompaniesApiService } from '../../core/services/companies-api.service';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatIconModule,
+    CommonModule,
+    NgxMaskDirective,
   ],
-  template: `
-    <h2 mat-dialog-title>Nova Empresa</h2>
-    <form [formGroup]="form" (ngSubmit)="submit()" class="grid gap-4 p-4">
-      <mat-form-field appearance="outline">
-        <mat-label>Nome</mat-label>
-        <input matInput formControlName="name" required />
-        @if (form.get('name')?.invalid) {
-          <mat-error>Informe o nome</mat-error>
-        }
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>CNPJ</mat-label>
-        <input matInput formControlName="cnpj" required />
-        @if (form.get('cnpj')?.invalid) {
-          <mat-error>Informe o CNPJ</mat-error>
-        }
-      </mat-form-field>
-
-      <div class="flex justify-end gap-2">
-        <button mat-button mat-dialog-close>Cancelar</button>
-        <button mat-flat-button color="primary" [disabled]="form.invalid || form.pending">
-          Salvar
-        </button>
-      </div>
-    </form>
-  `,
+  providers: [CompaniesApiService, provideNgxMask()],
+  templateUrl: './company-form.dialog.html',
 })
 export class CompanyFormDialog {
   form;
@@ -52,12 +34,15 @@ export class CompanyFormDialog {
     private ref: MatDialogRef<CompanyFormDialog>,
   ) {
     this.form = this.fb.group({
-      name: ['', Validators.required],
-      cnpj: ['', Validators.required],
+      name: ['', [Validators.required, Validators.minLength(3)]],
+      cnpj: ['', [Validators.required, cnpjValidator()]],
     });
   }
   submit() {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
     this.api
       .create(this.form.value as { name: string; cnpj: string })
       .subscribe({ next: () => this.ref.close(true) });

@@ -1,0 +1,48 @@
+<h2 mat-dialog-title class="text-xl font-semibold tracking-tight flex items-center gap-2 mb-1">
+  <mat-icon fontSet="material-symbols-outlined" class="text-gray-600">link</mat-icon>
+  Associar Ativo
+</h2>
+
+<mat-dialog-content class="mt-1 grid gap-4">
+  <p class="text-sm text-gray-600">Selecione um ativo disponível para associar ao funcionário.</p>
+
+  <mat-form-field appearance="fill" class="w-full">
+    <mat-label>Ativo disponível</mat-label>
+    <mat-select [(value)]="selectedId" aria-label="Ativos disponíveis">
+      @for (a of available(); track a.id) {
+        <mat-option
+          [value]="a.id"
+          class="flex items-center !gap-4 !bg-white hover:!bg-gray-50 h-fit"
+        >
+          <div class="flex flex-col">
+            <span class="font-medium">{{ a.name }}</span>
+            <span class="text-xs text-gray-500">{{ a.type }}</span>
+          </div>
+        </mat-option>
+      }
+    </mat-select>
+    @if (!loading() && available().length === 0) {
+      <mat-hint>Nenhum ativo disponível no momento.</mat-hint>
+    }
+  </mat-form-field>
+
+  @if (loading()) {
+    <div class="h-10 w-full bg-gray-200 rounded animate-pulse"></div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="pt-2 flex justify-end gap-2">
+  <button mat-stroked-button mat-dialog-close class="!rounded-xl px-4 py-2 hover:bg-gray-100">
+    Cancelar
+  </button>
+
+  <button
+    mat-flat-button
+    color="primary"
+    class="!rounded-xl px-4 py-2 !bg-black !text-white"
+    [disabled]="!selectedId || loading()"
+    (click)="confirm()"
+  >
+    Associar
+  </button>
+</mat-dialog-actions>

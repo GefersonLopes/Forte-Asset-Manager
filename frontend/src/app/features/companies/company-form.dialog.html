@@ -1,0 +1,71 @@
+<header class="flex items-center justify-between margin-auto">
+  <div class="flex flex-wrap items-center pt-8 ml-5">
+    <mat-icon fontSet="material-symbols-outlined" class="ml-2 text-2xl mr-2">apartment</mat-icon>
+    <h2 class="text-2xl font-semibold">Nova Empresa</h2>
+  </div>
+
+  <mat-icon
+    mat-dialog-close
+    fontSet="material-symbols-outlined"
+    class="cursor-pointer text-gray-600 hover:text-gray-800 mr-5 text-xl"
+    >close</mat-icon
+  >
+</header>
+
+<mat-dialog-content class="mt-1">
+  <form [formGroup]="form" (ngSubmit)="submit()" class="grid gap-4 pt-2">
+    <mat-form-field appearance="fill" class="w-full">
+      <mat-label>Nome</mat-label>
+      <input matInput formControlName="name" required />
+
+      @if (form.get('name')?.hasError('required')) {
+        <mat-error>O nome é obrigatório</mat-error>
+      }
+      @if (form.get('name')?.hasError('minlength')) {
+        <mat-error>O nome deve ter pelo menos 3 caracteres</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="w-full">
+      <mat-label>CNPJ</mat-label>
+      <input
+        matInput
+        formControlName="cnpj"
+        required
+        inputmode="numeric"
+        mask="00.000.000/0000-00"
+        [dropSpecialCharacters]="false"
+      />
+
+      @if (form.get('cnpj')?.hasError('required')) {
+        <mat-error>O CNPJ é obrigatório</mat-error>
+      }
+      @if (form.get('cnpj')?.hasError('cnpjInvalid')) {
+        <mat-error>CNPJ inválido</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <button mat-stroked-button mat-dialog-close class="w-1/2 h-10 !rounded-xl">Cancelar</button>
+
+      <span
+        class="inline-flex rounded-xl w-1/2 h-10 items-center justify-center transition-colors"
+        [class.cursor-not-allowed]="form.invalid || form.pending"
+        [ngClass]="
+          form.invalid || form.pending
+            ? 'border border-black bg-transparent text-black'
+            : 'bg-black text-white'
+        "
+      >
+        <button
+          mat-flat-button
+          type="submit"
+          [disabled]="form.invalid || form.pending"
+          class="rounded-xl transition-colors w-full h-full"
+        >
+          Salvar
+        </button>
+      </span>
+    </div>
+  </form>
+</mat-dialog-content>

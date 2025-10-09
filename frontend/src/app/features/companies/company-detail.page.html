@@ -1,0 +1,168 @@
+<header class="mb-6">
+  <div class="flex items-center justify-between gap-3">
+    <div>
+      <h1 class="text-3xl font-semibold tracking-tight">
+        {{ company()?.name || 'Empresa' }}
+      </h1>
+      <p class="text-sm text-gray-600">CNPJ: {{ company()?.cnpj }}</p>
+    </div>
+
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="openCreateEmployee()"
+      class="!rounded-xl px-4 py-2 flex items-center !bg-black !text-white"
+    >
+      <mat-icon fontSet="material-symbols-outlined">add</mat-icon>
+      <p class="text-sm md:text-base">Adicionar Funcionário</p>
+    </button>
+  </div>
+</header>
+
+<section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+  <div class="rounded-2xl border bg-white p-4 shadow-sm">
+    <div class="flex items-center justify-between">
+      <span class="text-sm text-gray-600">Total de Funcionários</span>
+      <span class="material-symbols-outlined text-xl text-gray-500">group</span>
+    </div>
+    <div class="mt-2 text-3xl font-bold">{{ total() }}</div>
+  </div>
+
+  <div class="rounded-2xl border bg-white p-4 shadow-sm">
+    <div class="flex items-center justify-between">
+      <span class="text-sm text-gray-600">Ativos</span>
+      <span class="material-symbols-outlined text-xl text-gray-500">check_circle</span>
+    </div>
+    <div class="mt-2 text-3xl font-bold">
+      {{ total() }}
+    </div>
+    <span
+      class="mt-2 inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800"
+      >Ativos</span
+    >
+  </div>
+
+  <div class="rounded-2xl border bg-white p-4 shadow-sm">
+    <div class="flex items-center justify-between">
+      <span class="text-sm text-gray-600">Novos no mês</span>
+      <span class="material-symbols-outlined text-xl text-gray-500">trending_up</span>
+    </div>
+    <div class="mt-2 text-3xl font-bold">{{ newThisMonth() }}</div>
+  </div>
+</section>
+
+@if (filtered().length === 0) {
+  <div class="rounded-2xl border bg-white p-8 text-center text-gray-600">
+    <div class="mb-2 flex justify-center">
+      <span class="material-symbols-outlined text-5xl text-gray-400">inventory_2</span>
+    </div>
+    Nenhum funcionário cadastrado
+  </div>
+}
+
+<section class="grid grid-cols-1 md:grid-cols-1 gap-4">
+  @for (e of filtered(); track e.id) {
+    <article class="rounded-2xl border bg-white p-4 shadow-sm">
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-3">
+          <div
+            class="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 font-semibold"
+          >
+            {{ initials(e.name) }}
+          </div>
+          <div>
+            <h3 class="text-base font-semibold leading-tight">{{ e.name }}</h3>
+            <div class="mt-1 flex flex-wrap items-center gap-2">
+              <span
+                class="inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-800"
+                >Funcionário</span
+              >
+              <span
+                class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800"
+                >Ativo</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <a
+          aria-label="Mais ações"
+          color="primary"
+          class="text-2xl"
+          [routerLink]="['/employees', e.id, 'assets']"
+        >
+          <span class="material-symbols-outlined">more_vert</span>
+        </a>
+      </div>
+
+      <ul class="mt-4 space-y-2 text-sm text-gray-700">
+        <li class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-gray-500 text-base">mail</span>
+          <span class="truncate">{{ e.email }}</span>
+        </li>
+        <li class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-gray-500 text-base">badge</span>
+          <span>{{ e.cpf }}</span>
+        </li>
+        <li class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-gray-500 text-base">event</span>
+          <span>Admitido em {{ formatDate(e.createdAt || '') }}</span>
+        </li>
+      </ul>
+
+      <div class="mt-4 flex justify-end">
+        <a
+          mat-stroked-button
+          color="primary"
+          class="!rounded-xl px-4 py-2 flex items-center gap-2 !bg-gray-500 !text-white"
+          [routerLink]="['/employees', e.id, 'assets']"
+        >
+          Gerenciar Ativos
+        </a>
+      </div>
+    </article>
+  }
+</section>
+
+<section class="mt-4 flex items-center justify-between gap-3">
+  <p class="text-sm text-gray-600">
+    Página <span class="font-medium">{{ page() }}</span> de
+    <span class="font-medium">{{ totalPages() }}</span>
+  </p>
+
+  <div class="flex items-center gap-2">
+    <span class="inline-flex" [class.cursor-not-allowed]="page() === 1">
+      <button
+        mat-stroked-button
+        class="rounded-xl transition-colors"
+        (click)="prevPage()"
+        [disabled]="page() === 1"
+        [ngClass]="{
+          'opacity-50': page() === 1,
+          'hover:bg-gray-100': page() !== 1,
+        }"
+        aria-disabled="{{ page() === 1 }}"
+        title="{{ page() === 1 ? 'Não há página anterior' : '' }}"
+      >
+        Anterior
+      </button>
+    </span>
+
+    <span class="inline-flex" [class.cursor-not-allowed]="page() === totalPages()">
+      <button
+        mat-stroked-button
+        class="rounded-xl transition-colors"
+        (click)="nextPage()"
+        [disabled]="page() === totalPages()"
+        [ngClass]="{
+          'opacity-50': page() === totalPages(),
+          'hover:bg-gray-100': page() !== totalPages(),
+        }"
+        aria-disabled="{{ page() === totalPages() }}"
+        title="{{ page() === totalPages() ? 'Você já está na última página' : '' }}"
+      >
+        Próxima
+      </button>
+    </span>
+  </div>
+</section>
